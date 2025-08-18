@@ -296,6 +296,7 @@ public class SpawnRule extends RuleBase<RuleBase.EventGetter> {
                 .attribute(Attribute.createMulti(BIOMETYPE))
                 .attribute(Attribute.createMulti(DIMENSION))
                 .attribute(Attribute.createMulti(DIMENSION_MOD))
+                .attribute(Attribute.createMulti(NPC))
                 .attribute(Attribute.create(STATE))
                 .attribute(Attribute.createMulti(SCOREBOARDTAGS_ALL))
                 .attribute(Attribute.createMulti(SCOREBOARDTAGS_ANY))

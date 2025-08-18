@@ -33,6 +33,16 @@ repos()
 runs('incontrol')
 jars('incontrol')
 
+repositories {
+    // Put repositories for dependencies here
+    // ForgeGradle automatically adds the Forge maven and Maven Central for you
+
+    // If you have mod jar dependencies in ./libs, you can declare them as a repository like so:
+    flatDir {
+        dir 'libs'
+    }
+}
+
 sourceSets.main.resources {
     srcDir 'src/generated/resources'
 }
@@ -44,6 +54,7 @@ dependencies {
     lostcities()
     gamestages()
     sereneseasons()
+    implementation fg.deobf("lib:CustomNPCs:1.20.1-GBPort-Unofficial-20240824")
 }
 
 cfdeps(['game-stages', 'the-lost-cities'], [], [])

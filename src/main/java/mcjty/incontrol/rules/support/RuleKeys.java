@@ -1,5 +1,6 @@
 package mcjty.incontrol.rules.support;
 
+import mcjty.incontrol.events.mob.CNPCMob;
 import mcjty.incontrol.tools.typed.Key;
 import mcjty.incontrol.tools.typed.Type;
 import net.minecraft.resources.ResourceKey;
@@ -51,6 +52,7 @@ public interface RuleKeys {
     Key<Boolean> HASSTRUCTURE = Key.create(Type.BOOLEAN, "hasstructure");
     Key<String> STRUCTURETAGS = Key.create(Type.STRING, "structuretags");
     Key<ResourceKey<Level>> DIMENSION = Key.create(Type.DIMENSION_TYPE, "dimension");
+    Key<CNPCMob> NPC = Key.create(Type.NPC, "npc");
     Key<String> DIMENSION_MOD = Key.create(Type.STRING, "dimensionmod");
 
     Key<String> SCOREBOARDTAGS_ALL = Key.create(Type.STRING, "scoreboardtags_all");

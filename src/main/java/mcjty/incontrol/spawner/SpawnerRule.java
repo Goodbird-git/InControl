@@ -4,6 +4,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import mcjty.incontrol.ErrorHandler;
 import mcjty.incontrol.InControl;
+import mcjty.incontrol.events.SpawnEventAction;
+import mcjty.incontrol.events.mob.CNPCMob;
+import mcjty.incontrol.events.mob.DefaultMob;
 import mcjty.incontrol.rules.support.RuleKeys;
 import mcjty.incontrol.tools.rules.TestingTools;
 import mcjty.incontrol.tools.varia.Tools;
@@ -11,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -20,7 +24,7 @@ import static mcjty.incontrol.rules.support.RuleKeys.PHASE;
 
 public class SpawnerRule {
 
-    private final List<EntityType<?>> mobs = new ArrayList<>();
+    private final List<DefaultMob> mobs = new ArrayList<>();
     private final List<Float> weights = new ArrayList<>();
     private final List<String> scoreboardTags = new ArrayList<>();
     private final MobCategory mobsFromBiome;
@@ -80,7 +84,7 @@ public class SpawnerRule {
 
     }
 
-    public List<EntityType<?>> getMobs() {
+    public List<DefaultMob> getMobs() {
         return mobs;
     }
 
@@ -246,17 +250,13 @@ public class SpawnerRule {
         }
     }
 
+
     private static void addMob(Builder builder, JsonElement element) {
-        EntityType<?> value = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(element.getAsString()));
-        if (value == null) {
-            InControl.setup.getLogger().error("Error finding entity " + element.getAsString() + "!");
-            throw new RuntimeException("Error finding entity " + element.getAsString() + "!");
-        }
-        builder.mobs(value);
+        builder.mobs(SpawnEventAction.parseMob(element));
     }
 
     public static class Builder {
-        private final List<EntityType<?>> mobs = new ArrayList<>();
+        private final List<DefaultMob> mobs = new ArrayList<>();
         private final List<Float> weights = new ArrayList<>();
         private final List<String> scoreboardTags = new ArrayList<>();
         private MobCategory mobsFromBiome = null;
@@ -270,7 +270,7 @@ public class SpawnerRule {
         private int groupDistance = -1;
         private SpawnerConditions conditions = SpawnerConditions.DEFAULT;
 
-        public Builder mobs(EntityType<?>... mobs) {
+        public Builder mobs(DefaultMob... mobs) {
             Collections.addAll(this.mobs, mobs);
             return this;
         }

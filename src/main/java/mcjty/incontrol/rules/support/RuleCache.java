@@ -1,8 +1,10 @@
 package mcjty.incontrol.rules.support;
 
+import mcjty.incontrol.events.mob.CNPCMob;
 import mcjty.incontrol.tools.varia.Tools;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.Animal;
@@ -11,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraftforge.registries.ForgeRegistries;
+import noppes.npcs.entity.EntityNPCInterface;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -60,6 +63,11 @@ public class RuleCache {
     public int getCount(LevelAccessor world, EntityType entityType) {
         CachePerWorld cache = getOrCreateCache(world);
         return cache.getCount(entityType);
+    }
+
+    public int getNpcCount(LevelAccessor world, Entity entity) {
+        CachePerWorld cache = getOrCreateCache(world);
+        return cache.getNpcCount(entity);
     }
 
     public int getCountPerMod(LevelAccessor world, String mod) {
@@ -117,6 +125,7 @@ public class RuleCache {
     private static class CachePerWorld {
 
         private final Map<EntityType, Integer> cachedCounters = new HashMap<>();
+        private final Map<CNPCMob, Integer> cachedNpcCounters = new HashMap<>();
         private final Map<String, CountPerMod> countPerMod = new HashMap<>();
         private int countPassive = -1;
         private int countHostile = -1;
@@ -165,6 +174,7 @@ public class RuleCache {
 
             cachedCounters.clear();
             countPerMod.clear();
+            cachedNpcCounters.clear();
             countPassive = 0;
             countHostile = 0;
             countNeutral = 0;
@@ -190,12 +200,26 @@ public class RuleCache {
                         count.neutral++;
                         countNeutral++;
                     }
+
+                    if(entity instanceof EntityNPCInterface && entity.getPersistentData().contains("InControlNatSpawnName") && entity.getPersistentData().contains("InControlNatSpawnTab")){
+                        CNPCMob mob = new CNPCMob(entity.getPersistentData().getInt("InControlNatSpawnTab"), entity.getPersistentData().getString("InControlNatSpawnName"));
+                        cnt = cachedNpcCounters.getOrDefault(mob, 0) + 1;
+                        cachedNpcCounters.put(mob, cnt);
+                    }
                 }
             });
         }
 
         public int getCount(EntityType entityType) {
             return cachedCounters.getOrDefault(entityType, 0);
+        }
+
+        public int getNpcCount(Entity entity) {
+            if(entity instanceof EntityNPCInterface && entity.getPersistentData().contains("InControlNatSpawnName") && entity.getPersistentData().contains("InControlNatSpawnTab")){
+                CNPCMob mob = new CNPCMob(entity.getPersistentData().getInt("InControlNatSpawnTab"), entity.getPersistentData().getString("InControlNatSpawnName"));
+                return cachedNpcCounters.getOrDefault(mob, 0);
+            }
+            return getCount(entity.getType());
         }
 
         public CountPerMod getCountPerMod(String mod) {

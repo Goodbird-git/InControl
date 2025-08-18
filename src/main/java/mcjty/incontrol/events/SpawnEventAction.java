@@ -3,6 +3,8 @@ package mcjty.incontrol.events;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import mcjty.incontrol.ErrorHandler;
+import mcjty.incontrol.events.mob.CNPCMob;
+import mcjty.incontrol.events.mob.DefaultMob;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
@@ -10,13 +12,30 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public record SpawnEventAction(List<ResourceLocation> mobid, int attempts,
+public record SpawnEventAction(List<DefaultMob> mobid, int attempts,
                                float mindistance, float maxdistance, int minamount, int maxamount,
                                boolean norestrictions) {
 
     @Nullable
+    public static DefaultMob parseMob(JsonElement mob){
+        if(mob.isJsonObject()){
+            String mobName = mob.getAsJsonObject().get("mob").getAsString();
+            if(mobName.equals("customnpcs:customnpc")){
+                return new CNPCMob(mob.getAsJsonObject().get("cloneTab").getAsInt(),
+                        mob.getAsJsonObject().get("cloneName").getAsString());
+            }
+        }
+        ResourceLocation mobid = new ResourceLocation(mob.getAsString());
+        if (!ForgeRegistries.ENTITY_TYPES.containsKey(mobid)) {
+            ErrorHandler.error("Invalid mob '" + mobid + "' for events rule!");
+            return null;
+        }
+        return new DefaultMob(mobid);
+    }
+
+    @Nullable
     static SpawnEventAction parse(JsonObject object) {
-        List<ResourceLocation> mobs = new ArrayList<>();
+        List<DefaultMob> mobs = new ArrayList<>();
         JsonObject value = object.getAsJsonObject("spawn");
         if (value == null) {
             // Valid
@@ -25,20 +44,10 @@ public record SpawnEventAction(List<ResourceLocation> mobid, int attempts,
         JsonElement mob = value.get("mob");
         if (mob.isJsonArray()) {
             for (JsonElement element : mob.getAsJsonArray()) {
-                ResourceLocation mobid = new ResourceLocation(element.getAsString());
-                if (!ForgeRegistries.ENTITY_TYPES.containsKey(mobid)) {
-                    ErrorHandler.error("Invalid mob '" + mobid + "' for events rule!");
-                    return null;
-                }
-                mobs.add(mobid);
+                mobs.add(parseMob(element));
             }
         } else {
-            ResourceLocation mobid = new ResourceLocation(mob.getAsString());
-            if (!ForgeRegistries.ENTITY_TYPES.containsKey(mobid)) {
-                ErrorHandler.error("Invalid mob '" + mobid + "' for events rule!");
-                return null;
-            }
-            mobs.add(mobid);
+            mobs.add(parseMob(mob));
         }
         if (mobs.isEmpty()) {
             ErrorHandler.error("No mobs specified for events rule!");

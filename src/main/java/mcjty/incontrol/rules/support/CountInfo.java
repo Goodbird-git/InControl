@@ -11,6 +11,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraftforge.registries.ForgeRegistries;
+import noppes.npcs.CustomEntities;
+import noppes.npcs.CustomNpcs;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
@@ -55,7 +57,7 @@ class CountInfo {
         } else {
             List<EntityType> infoEntityType = entityTypes;
             if (infoEntityType.isEmpty()) {
-                counter = (world, entity) -> InControl.setup.cache.getCount(world, entity.getType());
+                counter = (world, entity) -> entity.getType() == CustomEntities.entityCustomNpc ? InControl.setup.cache.getNpcCount(world, entity) : InControl.setup.cache.getCount(world, entity.getType());
             } else if (infoEntityType.size() == 1) {
                 counter = (world, entity) -> {
                     EntityType entityType = infoEntityType.get(0);
