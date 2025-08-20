@@ -11,6 +11,7 @@ import java.util.Objects;
 public class CNPCMob extends DefaultMob {
     private int cloneTab;
     private String cloneName;
+    private Entity cached;
 
     public CNPCMob(int cloneTab, String cloneName) {
         this.cloneName = cloneName;
@@ -47,10 +48,12 @@ public class CNPCMob extends DefaultMob {
     @Override
     public Entity getEntity(ServerLevel level) {
         try {
-            Entity entity = NpcAPI.Instance().getClones().get(cloneTab, cloneName, NpcAPI.Instance().getIWorld(level)).getMCEntity();
-            entity.getPersistentData().putInt("InControlNatSpawnTab", cloneTab);
-            entity.getPersistentData().putString("InControlNatSpawnName", cloneName);
-            return entity;
+            if(cached==null || cached.isAddedToWorld()) {
+                cached = NpcAPI.Instance().getClones().get(cloneTab, cloneName, NpcAPI.Instance().getIWorld(level)).getMCEntity();
+                cached.getPersistentData().putInt("InControlNatSpawnTab", cloneTab);
+                cached.getPersistentData().putString("InControlNatSpawnName", cloneName);
+            }
+            return cached;
         }catch (Exception e){
             return null;
         }
